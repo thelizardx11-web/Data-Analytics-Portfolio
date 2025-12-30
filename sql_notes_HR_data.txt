@@ -1,0 +1,93 @@
+-- Database Create + Use
+CREATE DATABASE hr_project;
+USE hr_project;
+
+-- HR tables Create
+CREATE TABLE employees (
+	employee_id INT PRIMARY KEY AUTO_INCREMENT,
+    emp_name VARCHAR(100),
+    deparment VARCHAR(50),
+    join_date DATE,
+    salary DECIMAL(10,2)
+);
+
+-- ATTENDANCE / WORK TABLE 
+CREATE TABLE employee_work (
+    work_id INT PRIMARY KEY AUTO_INCREMENT,
+    employee_id INT,
+    work_date DATE,
+    work_amount DECIMAL(10,2),
+    FOREIGN KEY (employee_id) REFERENCES employees(employee_id)
+);
+
+-- Sample dataset employess 
+INSERT INTO employees (emp_name, deparment, join_date, salary) VALUES
+('Aman', 'HR', '2023-01-10', 30000),
+('Rohit', 'IT', '2023-02-15', 45000),
+('Neha', 'Finance', '2023-03-01', 50000),
+('Pooja', 'HR', '2023-04-20', 28000),
+('Rahul', 'IT', '2023-05-05', 40000);
+
+-- Employee monthly work 
+INSERT INTO employee_work (employee_id, work_date, work_amount) VALUES
+(1, '2024-01-05', 4000),
+(1, '2024-01-20', 7000),
+(2, '2024-01-10', 12000),
+(3, '2024-02-15', 15000),
+(3, '2024-02-25', 8000),
+(5, '2024-03-10', 6000);
+
+-- Important Hr queries 
+SELECT 
+	e.employee_id,
+    e.emp_name,
+    SUM(w.work_amount) AS total_work_amount
+FROM employees e
+JOIN employee_work w
+    ON e.employee_id = w.employee_id
+GROUP BY e.employee_id, e.emp_name
+HAVING total_work_amount > 10000;
+
+-- Month-wise total work 
+SELECT 
+    DATE_FORMAT(work_date, '%Y-%m') AS work_month,
+    SUM(work_amount) AS total_work_amount
+FROM employee_work
+GROUP BY DATE_FORMAT(work_date, '%Y-%m')
+ORDER BY work_month;
+
+-- All employee + total work entries (even zero)
+SELECT
+    e.employee_id,
+    e.emp_name,
+    COUNT(w.work_id) AS total_work_entries
+FROM employees e
+LEFT JOIN employee_work w 
+     ON e.employee_id = w.employee_id
+GROUP BY e.employee_id, e.emp_name
+ORDER BY total_work_entries DESC;
+
+-- Extra HR usefull queries 
+SELECT 
+    e.employee_id,
+    e.emp_name
+FROM employees e
+LEFT JOIN employee_work w
+    ON e.employee_id = w.employee_id
+WHERE w.work_id IS NULL;
+
+-- Department wise total salary 
+SELECT 
+    deparment,
+    SUM(salary) AS total_salary
+FROM employees
+GROUP BY deparment;
+
+-- 1. Total work per employee (> 10,000) using using group by + having 
+SELECT 
+   employee_id,
+   Sum(work_hours) AS total_work
+FROM hr_project
+GROUP BY employee_id
+HAVING SUM(work_hours) > 10000;
+
